@@ -1,0 +1,118 @@
+{
+  "teams": {
+    "team_1": {
+      "id": "team_1",
+      "name": "Đội A"
+    },
+    "team_2": {
+      "id": "team_2",
+      "name": "Đội B"
+    },
+    "team_3": {
+      "id": "team_3",
+      "name": "Đội C"
+    },
+    "team_4": {
+      "id": "team_4",
+      "name": "Đội D"
+    },
+    "team_5": {
+      "id": "team_5",
+      "name": "Đội E"
+    },
+    "team_6": {
+      "id": "team_6",
+      "name": "Đội F"
+    }
+  },
+  "matches": {
+    "match_1": {
+      "title": "Trận Chung Kết Hội Thi Tự Hào Lịch Sử",
+      "team_ids": [
+        "team_1",
+        "team_2",
+        "team_3",
+        "team_4"
+      ],
+      "round_1": {
+        "package_1": {
+          "question_1": {
+            "question": "Ai là người sáng lập ra Đảng Cộng sản Việt Nam?",
+            "answer": "Nguyễn Ái Quốc",
+            "media": {
+              "type": "image",
+              "url": "https://example.com/image1.jpg"
+            }
+          },
+          "question_2": {
+            "question": "Bạn đang nghe bài phát biểu nào?",
+            "answer": "Lời kêu gọi toàn quốc kháng chiến",
+            "media": {
+              "type": "audio",
+              "url": "https://example.com/audio1.mp3"
+            }
+          }
+        }
+      },
+      "round_2": {
+        "question_1": {
+          "question": "Năm 1945, sự kiện nào diễn ra vào ngày 2/9?",
+          "options": {
+            "A": "Khởi nghĩa Nam Kỳ",
+            "B": "Tuyên ngôn độc lập",
+            "C": "Toàn quốc kháng chiến",
+            "D": "Chiến dịch Điện Biên Phủ"
+          },
+          "answer": "B",
+          "media": {
+            "type": "image",
+            "url": "https://example.com/q2-image.jpg"
+          }
+        },
+        "question_2": {
+          "question": "Ai là Chủ tịch nước đầu tiên của nước Việt Nam Dân chủ Cộng hòa?",
+          "options": {
+            "A": "Trường Chinh",
+            "B": "Lê Duẩn",
+            "C": "Hồ Chí Minh",
+            "D": "Phạm Văn Đồng"
+          },
+          "answer": "C",
+          "media": {
+            "type": "image",
+            "url": "https://example.com/q3-image.jpg"
+          }
+        }
+      },
+      "round_3": {
+        "package_1": {
+          "hint_image_url": "https://example.com/final-image1.jpg",
+          "hint_answer": "Chiến dịch Hồ Chí Minh",
+          "question_1": {
+            "question": "Bài hát bạn đang nghe là gì?",
+            "answer": "Như có Bác Hồ trong ngày vui đại thắng",
+            "media": {
+              "type": "audio",
+              "url": "https://example.com/song1.mp3"
+            },
+            "piece_image_url": "https://example.com/puzzle/piece1.png"
+          },
+          "question_2": {
+            "question": "Bức ảnh này gợi nhắc đến sự kiện nào?",
+            "answer": "Giải phóng miền Nam 1975",
+            "media": {
+              "type": "image",
+              "url": "https://example.com/event.jpg"
+            },
+            "piece_image_url": "https://example.com/puzzle/piece2.png"
+          }
+        },
+        "status": {
+          "unlocked": 1,
+          "locked": 1,
+          "remaining": 0
+        }
+      }
+    }
+  }
+}
