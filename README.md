@@ -26,20 +26,31 @@
 ### 🎯 Các phần thi:
 
 1. **Tiên phong**
-   - 4 bộ câu hỏi (8 câu/bộ)
-   - Thời gian trả lời: 10 giây
-   - Điểm: Số câu trả lời đúng
+   - 7 gói câu hỏi tương ứng với 7 đội thi
+   - Mỗi gói gồm 10 câu trả lời nhanh
+   - Thời gian: 10 giây/câu
+   - Đáp án hợp lệ phải kèm từ `chốt`
+   - Điểm: đúng +10, sai hoặc quá giờ = 0
 
 2. **Khát vọng**
-   - 10 câu hỏi
-   - Thời gian: 60 giây/câu
-   - Điểm theo thứ tự trả lời đúng
+   - Mỗi đội trình bày sản phẩm trực tuyến đã thiết kế
+   - Thời gian trình bày: 5 phút/đội
+   - Chấm điểm trực tiếp bởi Ban Giám khảo
+   - Cơ cấu điểm:
+     - Trực tuyến: 40%
+     - Thuyết minh: 60%
+   - Tổng điểm quy đổi: 100 điểm
 
 3. **Tự hào tiến bước**
-   - 4 bộ câu hỏi (3x3 grid)
-   - Thời gian: 5 giây buzz in, 15 giây trả lời
-   - Điểm: 10 điểm/câu đúng
-   - Bonus: Đoán hình ảnh
+   - 4 đội có tổng điểm phần 1 + phần 2 cao nhất vào thi đấu
+   - Có 4 mật ảnh, mỗi mật ảnh gồm 9 mảnh ghép câu hỏi
+   - Mỗi mảnh ghép tối đa 2 đội được quyền trả lời
+   - Điểm:
+     - Trả lời đúng lượt 1: +10
+     - Trả lời đúng lượt 2: +5
+     - Cả 2 lượt sai: khóa mảnh ghép
+   - Trả lời đúng mật ảnh:
+     - `(Số mảnh ghép chưa mở × 10) + 50`
 
 ## 🛠️ Công nghệ sử dụng
 
