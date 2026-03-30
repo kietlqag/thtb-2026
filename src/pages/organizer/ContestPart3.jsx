@@ -25,6 +25,7 @@ import {
     HomeOutlined,
     TrophyOutlined,
     BookOutlined,
+    LockOutlined,
 } from '@ant-design/icons';
 
 const { Title, Text, Paragraph } = Typography;
@@ -221,6 +222,31 @@ const QuestionDisplayScreen = ({
             message.error("Lỗi ghi điểm: " + error.message);
         }
     };
+
+    const handleLockPiece = async () => {
+        if (scoreRecorded) {
+            message.info("Đáp án đã được ghi nhận cho lượt này.");
+            return;
+        }
+        if (!isJigsawQuestion || !jigsawQuestionKey || !onJigsawQuestionAnsweredCallback) {
+            message.error("Không thể khóa mảnh ghép ở màn hình hiện tại.");
+            return;
+        }
+
+        setShowAnswer(true);
+        setIsTimerRunning(false);
+        setScoreRecorded(true);
+        setIsStealPhase(false);
+        setSelectedStealTeamId(null);
+
+        try {
+            await onJigsawQuestionAnsweredCallback(jigsawQuestionKey, false, null);
+            message.warning("Đã khóa mảnh ghép.");
+        } catch (error) {
+            console.error("[ContestPart3] Error locking jigsaw piece: ", error);
+            message.error("Lỗi khóa mảnh ghép.");
+        }
+    };
     
     const toggleAnswer = () => {
         setShowAnswer(prevShowAnswer => {
@@ -286,6 +312,7 @@ const QuestionDisplayScreen = ({
         };
         const isCorrectAction = type === 'correct';
         const isIncorrectAction = type === 'incorrect';
+        const isLockAction = type === 'lock';
 
         if (isCorrectAction) {
             style.minWidth = '100px';
@@ -305,6 +332,13 @@ const QuestionDisplayScreen = ({
             } else if (hoveredButton === 'incorrect' && !scoreRecorded) {
                 style.backgroundColor = 'rgba(209, 60, 48, 0.1)';
             }
+        } else if (isLockAction) {
+            style.minWidth = '120px';
+            style.borderColor = '#fa8c16';
+            style.color = '#fa8c16';
+            if (hoveredButton === 'lock' && !scoreRecorded) {
+                style.backgroundColor = 'rgba(250, 140, 22, 0.12)';
+            }
         } else { // Show/Hide Answer button
             style.borderColor = '#6c757d';
             style.color = '#333'; // Dark text for better readability on light button
@@ -312,7 +346,7 @@ const QuestionDisplayScreen = ({
             style.backgroundColor = 'rgba(255, 255, 255, 0.9)'; // Ensure it's light
             if (hoveredButton === 'toggleAnswer') style.backgroundColor = 'rgba(108, 117, 125, 0.2)';
         }
-        if (scoreRecorded && (isCorrectAction || isIncorrectAction)) {
+        if (scoreRecorded && (isCorrectAction || isIncorrectAction || isLockAction)) {
              style.cursor = 'not-allowed';
              style.opacity = 0.7;
         }
@@ -386,7 +420,7 @@ const QuestionDisplayScreen = ({
     );
     const displayedTeamName = isStealPhase
         ? (teamsInMatch.find(t => t.id === selectedStealTeamId)?.name || "Chọn đội cướp quyền")
-        : (teamsInMatch.find(t => t.id === currentAnsweringTeamId)?.name || "Chưa chọn đội");
+        : (teamsInMatch.find(t => t.id === currentAnsweringTeamId)?.name || "Chưa chọn đội")
     const actionButtonsDisabled = scoreRecorded || (isStealPhase && !selectedStealTeamId);
 
     if (!question) {
@@ -400,7 +434,7 @@ const QuestionDisplayScreen = ({
                     <Paragraph style={{color: 'white', marginTop: 10}}>Câu hỏi không tồn tại hoặc chưa được chọn.</Paragraph>
                 </div>
                  <div style={{ position: 'absolute', bottom: '30px', left: '30px', zIndex: 1000 }}>
-                    <Button icon={<ArrowLeftOutlined />} style={localControlButtonBaseStyle} onClick={onBackToPackageSelection} title="Về Màn Hình Trước" />
+                    <Button icon={<ArrowLeftOutlined />} style={localControlButtonBaseStyle} onClick={onBackToPackageSelection} title="Về màn hình trước" />
                 </div>
             </div>
         );
@@ -443,6 +477,14 @@ const QuestionDisplayScreen = ({
                                   onMouseEnter={() => setHoveredButton('incorrect')}
                                   onMouseLeave={() => setHoveredButton(null)}
                                 > SAI </Button>
+                                <Button
+                                  style={getResultButtonStyle('lock')}
+                                  onClick={handleLockPiece}
+                                  icon={<LockOutlined />}
+                                  disabled={scoreRecorded}
+                                  onMouseEnter={() => setHoveredButton('lock')}
+                                  onMouseLeave={() => setHoveredButton(null)}
+                                > KHÔNG TRẢ LỜI </Button>
                                 {/* <Button 
                                   style={getResultButtonStyle('toggleAnswer')} 
                                   onClick={toggleAnswer} 
@@ -589,12 +631,67 @@ const QuestionDisplayScreen = ({
             )}
 
 
+            {!isStealPhase && !scoreRecorded && teamsInMatch && teamsInMatch.length > 0 && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: '30px',
+                    right: '30px',
+                    zIndex: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                }}>
+                    <div style={{
+                        height: '50px',
+                        padding: '0 15px',
+                        backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                        color: currentAnsweringTeamId ? 'white' : '#ccc',
+                        fontStyle: currentAnsweringTeamId ? 'normal' : 'italic',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.2)',
+                        marginRight: '5px',
+                        minWidth: '220px',
+                    }}>
+                        {displayedTeamName}
+                    </div>
+                    {teamsInMatch.map((team, index) => {
+                        const isActive = currentAnsweringTeamId === team.id;
+                        return (
+                            <Button
+                                key={team.id}
+                                onClick={() => onSelectTeamForPackage(team.id)}
+                                style={{
+                                    width: '50px',
+                                    height: '50px',
+                                    fontSize: '16px',
+                                    borderRadius: '8px',
+                                    border: '2px solid white',
+                                    backgroundColor: isActive ? '#FFC107' : 'rgba(0,0,0,0.3)',
+                                    color: isActive ? 'black' : 'white',
+                                    fontWeight: 'bold',
+                                    padding: 0,
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                {index + 1}
+                            </Button>
+                        );
+                    })}
+                </div>
+            )}
+
             <div style={{ position: 'absolute', bottom: '30px', left: '30px', zIndex: 1000 }}>
                 <Button
                     icon={<ArrowLeftOutlined />}
                     style={localControlButtonBaseStyle}
                     onClick={onBackToPackageSelection} 
-                    title="Về Màn Hình Trước"
+                    title="Về màn hình trước"
                 />
             </div>
         </div>
@@ -617,6 +714,8 @@ const PackageSelectionScreen = ({
   packages,
   teams,
   onSelectPackage,
+  onSelectBonusJigsaw,
+  bonusJigsawPackage,
   onBackToIntroScreen,
   selectedTeamIdForPackage,
   onSelectTeamForPackage,
@@ -714,18 +813,19 @@ const PackageSelectionScreen = ({
 
   const categoryBaseStyle = {
     width: '100%',
-    minHeight: '200px',
-    borderRadius: '24px',
-    boxShadow: '0 12px 24px rgba(0,0,0,0.2)',
+    minHeight: '220px',
+    borderRadius: '30px',
+    boxShadow: '0 16px 28px rgba(0,0,0,0.2)',
     transition: 'transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease',
     overflow: 'hidden',
     cursor: 'pointer',
-    border: '2px solid rgba(255,255,255,0.28)',
+    border: 'none',
     padding: 0,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    background: 'transparent',
   };
 
   const categoryTextStyle = {
@@ -736,6 +836,13 @@ const PackageSelectionScreen = ({
     textShadow: '0 4px 10px rgba(0,0,0,0.3)',
     zIndex: 1,
   };
+
+  const bonusJigsawUsed =
+    !!bonusJigsawPackage &&
+    (
+      !!matchData?.jigsaw_states?.round_3?.[bonusJigsawPackage.dataKey]?.main_hint ||
+      Object.keys(matchData?.jigsaw_states?.round_3?.[bonusJigsawPackage.dataKey] || {}).length === 9
+    );
 
   return (
     <div
@@ -763,7 +870,7 @@ const PackageSelectionScreen = ({
       <div style={mainContentStyle}>
         {!availablePackages ? (
           <Text style={{color: '#ffc107', fontSize: '24px', fontStyle: 'italic', backgroundColor: 'rgba(0,0,0,0.7)', padding: '20px', borderRadius: '10px'}}>
-            Ph?n thi n?y ch?a c? g?i c?u h?i n?o.
+            Phần thi này chưa có gói câu hỏi nào.
           </Text>
         ) : (
           <>
@@ -795,28 +902,182 @@ const PackageSelectionScreen = ({
                     disabled={isPackageUsed}
                     style={{
                       ...categoryBaseStyle,
-                      background: `linear-gradient(160deg, ${pkgInfo.color}, ${pkgInfo.color}dd)`,
                       ...(isPackageUsed && {
-                        opacity: 0.55,
                         cursor: 'not-allowed',
+                        filter: 'grayscale(0.08)',
                       }),
                     }}
                     onMouseOver={(e) => {
                       if (!isPackageUsed) {
-                        e.currentTarget.style.transform = 'translateY(-5px)';
-                        e.currentTarget.style.boxShadow = '0 18px 28px rgba(0,0,0,0.24)';
+                        e.currentTarget.style.transform = 'translateY(-6px) scale(1.01)';
+                        e.currentTarget.style.boxShadow = '0 22px 34px rgba(0,0,0,0.24)';
                       }
                     }}
                     onMouseOut={(e) => {
                       if (!isPackageUsed) {
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.2)';
+                        e.currentTarget.style.boxShadow = '0 16px 28px rgba(0,0,0,0.2)';
                       }
                     }}
                   >
-                    <Title level={1} style={categoryTextStyle}>
-                      {packageData.name || pkgInfo.label}
-                    </Title>
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        position: 'relative',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '18px',
+                        opacity: isPackageUsed ? 0.72 : 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: 'absolute',
+                          inset: '8px',
+                          borderRadius: '28px',
+                          border: '2px solid rgba(20, 26, 38, 0.16)',
+                          boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+                          zIndex: 0,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          inset: '18px 12px 10px',
+                          borderRadius: isPackageUsed ? '22px 22px 26px 26px' : '24px',
+                          background: `linear-gradient(180deg, ${pkgInfo.color} 0%, ${pkgInfo.color}f0 55%, ${pkgInfo.color}d8 100%)`,
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22)',
+                          zIndex: 0,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '24px',
+                          right: '24px',
+                          top: isPackageUsed ? '14px' : '20px',
+                          height: isPackageUsed ? '50%' : '48%',
+                          clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+                          transformOrigin: 'top center',
+                          transform: isPackageUsed ? 'rotateX(180deg) translateY(-34px)' : 'rotateX(0deg)',
+                          transition: 'transform 0.35s ease, height 0.35s ease',
+                          background: `linear-gradient(180deg, ${pkgInfo.color} 0%, ${pkgInfo.color}f2 55%, ${pkgInfo.color}d6 100%)`,
+                          borderTopLeftRadius: '14px',
+                          borderTopRightRadius: '14px',
+                          borderLeft: '2px solid rgba(20, 26, 38, 0.14)',
+                          borderRight: '2px solid rgba(20, 26, 38, 0.14)',
+                          borderTop: '2px solid rgba(20, 26, 38, 0.2)',
+                          boxShadow: isPackageUsed
+                            ? '0 8px 14px rgba(0,0,0,0.12)'
+                            : '0 8px 16px rgba(0,0,0,0.2)',
+                          zIndex: 3,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '12px',
+                          right: '12px',
+                          bottom: '10px',
+                          top: isPackageUsed ? '40%' : '45%',
+                          borderBottomLeftRadius: '22px',
+                          borderBottomRightRadius: '22px',
+                          borderTopLeftRadius: isPackageUsed ? '20px' : '4px',
+                          borderTopRightRadius: isPackageUsed ? '20px' : '4px',
+                          background: `linear-gradient(180deg, ${pkgInfo.color}f5 0%, ${pkgInfo.color}dd 58%, ${pkgInfo.color}c8 100%)`,
+                          border: '2px solid rgba(20, 26, 38, 0.2)',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.3)',
+                          zIndex: 1,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: '13px',
+                          width: 'calc(50% - 13px)',
+                          bottom: '10px',
+                          top: isPackageUsed ? '40%' : '45%',
+                          clipPath: isPackageUsed
+                            ? 'polygon(0 0, 100% 0, 74% 34%, 0 34%)'
+                            : 'polygon(0 0, 100% 100%, 0 100%)',
+                          borderBottomLeftRadius: '22px',
+                          background: 'linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02))',
+                          borderLeft: '1px solid rgba(20, 26, 38, 0.16)',
+                          zIndex: 2,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          right: '13px',
+                          width: 'calc(50% - 13px)',
+                          bottom: '10px',
+                          top: isPackageUsed ? '40%' : '45%',
+                          clipPath: isPackageUsed
+                            ? 'polygon(0 0, 100% 0, 100% 34%, 26% 34%)'
+                            : 'polygon(100% 0, 100% 100%, 0 100%)',
+                          borderBottomRightRadius: '22px',
+                          background: 'linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02))',
+                          borderRight: '1px solid rgba(20, 26, 38, 0.16)',
+                          zIndex: 2,
+                        }}
+                      />
+                      {isPackageUsed && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            left: '32px',
+                            right: '32px',
+                            top: '36px',
+                            height: '14px',
+                            borderTopLeftRadius: '14px',
+                            borderTopRightRadius: '14px',
+                            borderTop: '2px solid rgba(20, 26, 38, 0.18)',
+                            background: 'rgba(255,255,255,0.08)',
+                            zIndex: 2,
+                          }}
+                        />
+                      )}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: 'calc(50% - 1px)',
+                          top: isPackageUsed ? '44%' : '49%',
+                          width: '2px',
+                          height: isPackageUsed ? '24px' : '28px',
+                          background: 'rgba(255,255,255,0.45)',
+                          boxShadow: '0 0 10px rgba(255,255,255,0.3)',
+                          zIndex: 4,
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'relative',
+                          zIndex: 5,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: isPackageUsed ? 'flex-end' : 'center',
+                          gap: '8px',
+                          width: '100%',
+                          height: '100%',
+                          paddingTop: isPackageUsed ? '54px' : '16px',
+                        }}
+                      >
+                        <Title
+                          level={1}
+                          style={{
+                            ...categoryTextStyle,
+                            color: 'white',
+                            textShadow: '0 4px 10px rgba(0,0,0,0.25)',
+                          }}
+                        >
+                          {pkgInfo.label}
+                        </Title>
+                      </div>
+                    </div>
                   </Button>
                 );
               })}
@@ -837,9 +1098,36 @@ const PackageSelectionScreen = ({
           icon={<ArrowLeftOutlined />}
           style={controlButtonBaseStyle}
           onClick={onBackToIntroScreen}
-          title="V? M?n H?nh Gi?i Thi?u"
+          title="Về Màn Hình Giới Thiệu"
         />
       </div>
+
+      {bonusJigsawPackage && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '30px',
+            right: '30px',
+            zIndex: 1001,
+          }}
+        >
+          <Button
+            icon={<FileImageOutlined />}
+            style={{
+              ...controlButtonBaseStyle,
+              width: 'auto',
+              minWidth: '56px',
+              padding: '0 14px',
+              gap: '8px',
+            }}
+            disabled={bonusJigsawUsed}
+            onClick={() => onSelectBonusJigsaw?.(bonusJigsawPackage.dataKey)}
+            title={bonusJigsawUsed ? 'Mật ảnh vòng phụ đã mở' : 'Mở mật ảnh vòng phụ'}
+          >
+            Phụ
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -939,10 +1227,6 @@ const JigsawScreen = ({
     }, [selectedTeamIdForPackage, packageId]);
 
     const handlePieceClick = (questionKey, questionData) => {
-        if (!selectedTeamIdForPackage) {
-            message.warning("Vui lòng chọn đội trả lời trước khi chọn mảnh ghép.");
-            return;
-        }
         if (!questionData) {
             message.error("Câu hỏi cho mảnh ghép này không tồn tại!");
             return;
@@ -1000,15 +1284,14 @@ const JigsawScreen = ({
 
     const pieceStyle = (qKey) => {
         const status = pieceStates[qKey]?.status || 'unanswered';
-        const canSelectPiece = !!selectedTeamIdForPackage;
         let style = {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 'clamp(2rem, 8vh, 4rem)', fontWeight: 'bold',
             color: 'white', // Default color for unanswered numbers
-            backgroundColor: canSelectPiece ? 'rgb(100, 65, 35)' : 'rgb(84, 54, 29)', // Keep pieces fully opaque even when disabled
+            backgroundColor: 'rgb(100, 65, 35)',
             border: '2px solid rgba(255,255,255,0.5)',
             borderRadius: '5px',
-            cursor: canSelectPiece ? 'pointer' : 'not-allowed',
+            cursor: 'pointer',
             transition: 'all 0.3s ease',
             textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
         };
@@ -1067,7 +1350,7 @@ const JigsawScreen = ({
                             <div
                                 key={q.key}
                                 style={pieceStyle(q.key)}
-                                onClick={selectedTeamIdForPackage ? () => handlePieceClick(q.key, q.data) : undefined}
+                                onClick={() => handlePieceClick(q.key, q.data)}
                                 title={selectedTeamIdForPackage ? `Mở / Xem lại câu hỏi mảnh ${q.number}` : 'Chọn đội trước khi mở mảnh ghép'}
                             >
                                 {status === 'unanswered' && q.number} {/* Display number only if unanswered */}
@@ -1109,10 +1392,6 @@ const JigsawScreen = ({
                   style={controlButtonBaseStyle} // Use the passed-in style
                   disabled={!selectedTeamIdForPackage}
                   onClick={async () => {
-                    if (!selectedTeamIdForPackage) {
-                      message.warning("Vui lòng chọn đội trả lời trước khi mở mật ảnh.");
-                      return;
-                    }
                     setShowMainHintAnswer(true);
 
                     if (mainHintState?.status === 'opened') {
@@ -1303,6 +1582,33 @@ function ContestPart3() {
             .slice(0, 4);
     }, [matchData, teamsInMatch]);
 
+    const bonusJigsawPackage = useMemo(() => {
+        if (!round3Data || typeof round3Data !== 'object') {
+            return null;
+        }
+
+        const defaultPackageKeys = new Set(['package_1', 'package_2', 'package_3', 'package_4', 'status']);
+        const extraPackageEntry = Object.entries(round3Data).find(([key, value]) => {
+            if (defaultPackageKeys.has(key) || !value || typeof value !== 'object' || Array.isArray(value)) {
+                return false;
+            }
+
+            const questionCount = Object.keys(value).filter((itemKey) => itemKey.startsWith('question_')).length;
+            return questionCount >= 9 && !!value.hint_image_url;
+        });
+
+        if (!extraPackageEntry) {
+            return null;
+        }
+
+        const [dataKey, data] = extraPackageEntry;
+        return {
+            dataKey,
+            data,
+            label: data?.name || 'Mật ảnh phụ',
+        };
+    }, [round3Data]);
+
     useEffect(() => {
         if (!matchId) {
             setErrorLoading("ID trận đấu không hợp lệ.");
@@ -1455,7 +1761,7 @@ function ContestPart3() {
         if (!data || questionKeysForJigsaw.length < 9 || !data.hint_image_url) {
             modal.error({
                 title: "Lỗi Gói Câu Hỏi (Ô Chữ)",
-                content: `Gói "${pkgName}" không đủ 9 câu hỏi hoặc thiếu ảnh mật hiệu. Vui lòng kiểm tra dữ liệu.`,
+                content: `Gói "${pkgName}" không đủ 9 câu hỏi hoặc thiếu ảnh mật hiệu. Vui lòng kiểm tra dữ liệu.`, 
             });
             return;
         }
@@ -1467,10 +1773,34 @@ function ContestPart3() {
         setCurrentView('jigsawScreen'); // Transition to Jigsaw screen
     };
     
+    const handleBonusJigsawSelected = (packageKey) => {
+        const data = round3Data?.[packageKey];
+        if (!data) {
+            message.error("Không tìm thấy dữ liệu mật ảnh vòng phụ.");
+            return;
+        }
+
+        const questionKeysForJigsaw = Object.keys(data || {}).filter((key) => key.startsWith('question_'));
+        if (questionKeysForJigsaw.length < 9 || !data.hint_image_url) {
+            modal.error({
+                title: "Lỗi mật ảnh vòng phụ",
+                content: "Mật ảnh vòng phụ chưa đủ 9 câu hỏi hoặc thiếu ảnh gợi ý.",
+            });
+            return;
+        }
+
+        setSelectedPackageId(packageKey);
+        setSelectedPackageName(data?.name || bonusJigsawPackage?.label || 'Mật ảnh phụ');
+        setSelectedPackageData(data);
+        setSelectedTeamIdForPackage(null);
+        setCurrentView('jigsawScreen');
+    };
+
     const handleBackToPackageSelectionFromQuestions = () => {
         // If coming from jigsaw's question, go back to jigsaw. Otherwise, package selection.
         if (currentView === 'questionDisplay' && selectedPackageData?.hint_image_url) { // Check if current package is a jigsaw package
             setCurrentView('jigsawScreen');
+            setSelectedTeamIdForPackage(null);
         } else {
             setCurrentView('packageSelection');
         }
@@ -1506,13 +1836,14 @@ function ContestPart3() {
         const JIGSAW_STATE_PATH_FOR_PIECE = `matches/${matchId}/jigsaw_states/${ROUND_ID}/${selectedPackageId}/${questionKey}`;
         const newStatus = isCorrect ? 'opened' : 'locked';
         
-        firebaseUpdate(ref(database, JIGSAW_STATE_PATH_FOR_PIECE), {
+        return firebaseUpdate(ref(database, JIGSAW_STATE_PATH_FOR_PIECE), {
             status: newStatus,
             teamId: answeredTeamId,
             timestamp: Date.now(),
         }).then(() => {
             console.log(`[ContestPart3] Jigsaw piece ${questionKey} status updated to ${newStatus}`);
             // The JigsawScreen's useEffect will pick up this change and re-render.
+            setSelectedTeamIdForPackage(null);
         }).catch(err => {
             console.error("[ContestPart3] Error updating jigsaw piece state:", err);
             message.error("Lỗi cập nhật trạng thái mảnh ghép.");
@@ -1563,6 +1894,8 @@ function ContestPart3() {
                             packages={round3Data}  
                             teams={teamsInMatch}   
                             onSelectPackage={handlePackageSelected}
+                            onSelectBonusJigsaw={handleBonusJigsawSelected}
+                            bonusJigsawPackage={bonusJigsawPackage}
                             onBackToIntroScreen={handleBackToIntroFromPackages} 
                             selectedTeamIdForPackage={selectedTeamIdForPackage} 
                             onSelectTeamForPackage={handleTeamSelectedForPackage} 
@@ -1660,14 +1993,14 @@ function ContestPart3() {
                                 icon={<TrophyOutlined />}
                                 style={controlButtonBaseStyle} 
                                 onClick={handleShowScore} 
-                                title={`Xem Điểm ${PART_TITLE}`} 
+                                title={`Xem Điểm ${PART_TITLE}`}
                                 disabled={loading}
                             />
                             <Button 
                                 icon={<BookOutlined />}
                                 style={controlButtonBaseStyle} 
                                 onClick={handleShowRules} 
-                                title={`Xem Thể Lệ ${PART_TITLE}`} 
+                                title={`Xem Thể Lệ ${PART_TITLE}`}
                                 disabled={loading}
                             />
                             <Button 
@@ -1753,3 +2086,7 @@ function ContestPart3() {
 }
 
 export default ContestPart3; 
+
+
+
+
