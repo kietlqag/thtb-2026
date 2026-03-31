@@ -5,6 +5,8 @@ import { ArrowLeftOutlined, BookOutlined, TrophyOutlined } from '@ant-design/ico
 import { ref, onValue, off } from 'firebase/database';
 import { database } from '../../services/firebase/config';
 import commonPartBackground from '../../assets/images/contest_background.png';
+import logo1 from '../../assets/images/logo1.png';
+import logo2 from '../../assets/images/logo2.png';
 
 const { Paragraph, Title, Text } = Typography;
 const RULES_FILE = '/rules/rules_contest_2.html';
@@ -144,6 +146,44 @@ function ContestPart2() {
 
   return (
     <div style={screenStyle}>
+      <div
+        style={{
+          position: 'absolute',
+          top: '28px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '24px',
+          flexWrap: 'wrap',
+          padding: '0 24px',
+          width: 'min(100%, 1200px)',
+          zIndex: 10,
+          pointerEvents: 'none',
+        }}
+      >
+        <img
+          src={logo1}
+          alt="Logo 1"
+          style={{
+            height: 'clamp(76px, 10vw, 130px)',
+            width: 'auto',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28))',
+          }}
+        />
+        <img
+          src={logo2}
+          alt="Logo 2"
+          style={{
+            height: 'clamp(76px, 10vw, 130px)',
+            width: 'auto',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28))',
+          }}
+        />
+      </div>
       <div
         style={{
           width: '100%',

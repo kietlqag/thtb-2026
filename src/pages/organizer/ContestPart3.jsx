@@ -4,6 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { database } from '../../services/firebase/config';
 import { ref, onValue, off, update as firebaseUpdate, get, set, serverTimestamp, runTransaction } from 'firebase/database';
 import commonPartBackground from '../../assets/images/contest_background.png';
+import logo1 from '../../assets/images/logo1.png';
+import logo2 from '../../assets/images/logo2.png';
 import {
     ArrowLeftOutlined,
     PlayCircleOutlined,
@@ -1220,12 +1222,6 @@ const JigsawScreen = ({
     const selectedTeam = teamsInMatch?.find((team) => team.id === selectedTeamIdForPackage) || null;
     const mainHintState = pieceStates?.main_hint || null;
 
-    useEffect(() => {
-        if (!selectedTeamIdForPackage) {
-            setShowMainHintAnswer(false);
-        }
-    }, [selectedTeamIdForPackage, packageId]);
-
     const handlePieceClick = (questionKey, questionData) => {
         if (!questionData) {
             message.error("Câu hỏi cho mảnh ghép này không tồn tại!");
@@ -1390,11 +1386,15 @@ const JigsawScreen = ({
                 <Button
                   icon={<EyeOutlined />}
                   style={controlButtonBaseStyle} // Use the passed-in style
-                  disabled={!selectedTeamIdForPackage}
                   onClick={async () => {
                     setShowMainHintAnswer(true);
 
                     if (mainHintState?.status === 'opened') {
+                      return;
+                    }
+
+                    if (!selectedTeamIdForPackage) {
+                      message.info("Da mo dap an mat anh. Chua chon doi nen khong cong diem.");
                       return;
                     }
 
@@ -1428,7 +1428,7 @@ const JigsawScreen = ({
             {hintAnswerText && (
                 <Modal
                     title="Đáp án mật ảnh"
-                    open={showMainHintAnswer && !!selectedTeamIdForPackage}
+                    open={showMainHintAnswer}
                     onCancel={() => setShowMainHintAnswer(false)}
                     footer={[<Button key="close" onClick={() => setShowMainHintAnswer(false)}>Đóng</Button>]}
                     width="50vw" 
@@ -1966,6 +1966,44 @@ function ContestPart3() {
             default:
                 return ( // Intro screen content
                     <>
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: '28px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '24px',
+                                flexWrap: 'wrap',
+                                padding: '0 24px',
+                                width: 'min(100%, 1200px)',
+                                zIndex: 10,
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            <img
+                                src={logo1}
+                                alt="Logo 1"
+                                style={{
+                                    height: 'clamp(76px, 10vw, 130px)',
+                                    width: 'auto',
+                                    objectFit: 'contain',
+                                    filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28))',
+                                }}
+                            />
+                            <img
+                                src={logo2}
+                                alt="Logo 2"
+                                style={{
+                                    height: 'clamp(76px, 10vw, 130px)',
+                                    width: 'auto',
+                                    objectFit: 'contain',
+                                    filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28))',
+                                }}
+                            />
+                        </div>
                         <div style={{
                             width: '100%', 
                             flexGrow: 1, 

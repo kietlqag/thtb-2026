@@ -16,6 +16,8 @@ import {
 import { ref, onValue, off, update, get, set, serverTimestamp } from 'firebase/database';
 import { database } from '../../services/firebase/config';
 import commonPartBackground from '../../assets/images/contest_background.png'; // Background chung
+import logo1 from '../../assets/images/logo1.png';
+import logo2 from '../../assets/images/logo2.png';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -1930,10 +1932,48 @@ function ContestPart1() {
           <div style={{
               width: '100%', // Take full width
               flexGrow: 1, // Allow it to take space to center content vertically
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', alignItems: 'center',
+              flexDirection: 'column',
+              justifyContent: 'center',
               pointerEvents: 'none', // So it doesn't interfere with buttons below
               zIndex: 10, // Ensure it's behind controls if they overlap, but above background
           }}>
+            <div
+              style={{
+                position: 'absolute',
+                top: '28px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '24px',
+                flexWrap: 'wrap',
+                padding: '0 24px',
+                width: 'min(100%, 1200px)',
+              }}
+            >
+              <img
+                src={logo1}
+                alt="Logo 1"
+                style={{
+                  height: 'clamp(76px, 10vw, 130px)',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28))',
+                }}
+              />
+              <img
+                src={logo2}
+                alt="Logo 2"
+                style={{
+                  height: 'clamp(76px, 10vw, 130px)',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28))',
+                }}
+              />
+            </div>
             <Title level={1} style={{
                 color: '#FFF7D6', textAlign: 'center', textShadow: '0 0 18px rgba(10, 40, 120, 0.45), 3px 3px 12px rgba(0, 0, 0, 0.35)', fontWeight: 'bold',
                 fontSize: 'clamp(3rem, 6vw, 6rem)', margin: 0, padding: '0 20px', lineHeight: '1.3',
