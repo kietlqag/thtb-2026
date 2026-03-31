@@ -14,6 +14,8 @@ const PART_DEFINITIONS = {
 
 const EMPTY_PART2_BREAKDOWN = {
   online: 0,
+  onlineRaw: 0,
+  onlineWeighted: 0,
   presentation: 0,
   total: 0,
   btc: 0,
@@ -34,7 +36,11 @@ const normalizePart2Breakdown = (rawBreakdown = {}, fallbackTotal = 0) => {
     ...rawBreakdown,
   };
 
-  const online = Number(breakdown.online || 0);
+  const hasExplicitOnlineRaw = breakdown.onlineRaw !== undefined && breakdown.onlineRaw !== null;
+  const onlineRaw = hasExplicitOnlineRaw
+    ? Number(breakdown.onlineRaw || 0)
+    : Number((Number(breakdown.online || 0) / 0.4).toFixed(2));
+  const onlineWeighted = Number((onlineRaw * 0.4).toFixed(2));
   const presentationRawAverage = average([
     breakdown.btc,
     breakdown.bgk_1,
@@ -51,17 +57,20 @@ const normalizePart2Breakdown = (rawBreakdown = {}, fallbackTotal = 0) => {
   const presentation = hasJudgeScores
     ? Number((presentationRawAverage * 0.6).toFixed(2))
     : Number(breakdown.presentation || 0);
+  const computedTotal = Number((onlineWeighted + presentation).toFixed(2));
   const total = hasJudgeScores
-    ? Number((online + presentation).toFixed(2))
+    ? computedTotal
     : Number(
         breakdown.total !== undefined
-          ? breakdown.total
-          : (fallbackTotal || online + presentation || 0)
+          ? computedTotal
+          : (fallbackTotal || computedTotal || 0)
       );
 
   return {
     ...breakdown,
-    online,
+    online: onlineWeighted,
+    onlineRaw,
+    onlineWeighted,
     presentationRawAverage: Number(presentationRawAverage.toFixed(2)),
     presentation,
     total: Number(total.toFixed(2)),
@@ -503,11 +512,11 @@ function ScoresPage() {
                           <Text>Trực tuyến (40%)</Text>
                           <InputNumber
                             min={0}
-                            max={40}
-                            value={breakdown.online}
-                            onChange={(value) => handlePart2BreakdownUpdate(team.id, 'online', value)}
+                            value={breakdown.onlineRaw}
+                            onChange={(value) => handlePart2BreakdownUpdate(team.id, 'onlineRaw', value)}
                             style={{ width: 90 }}
                           />
+                          <Text type="secondary">Quy đổi 40%: {breakdown.onlineWeighted}</Text>
                           <Text>BTC</Text>
                           <InputNumber min={0} max={100} value={breakdown.btc} onChange={(value) => handlePart2BreakdownUpdate(team.id, 'btc', value)} style={{ width: 80 }} />
                           <Text>BGK 1</Text>

@@ -8,6 +8,28 @@ import contestBackground from '../../assets/images/contest_background.png';
 
 const { Title, Text } = Typography;
 
+const normalizePart2Breakdown = (rawBreakdown = {}, fallbackTotal = 0) => {
+  const hasExplicitOnlineRaw = rawBreakdown.onlineRaw !== undefined && rawBreakdown.onlineRaw !== null;
+  const onlineRaw = hasExplicitOnlineRaw
+    ? Number(rawBreakdown.onlineRaw || 0)
+    : Number((Number(rawBreakdown.online || 0) / 0.4).toFixed(2));
+  const onlineWeighted = Number((onlineRaw * 0.4).toFixed(2));
+  const presentation = Number(rawBreakdown.presentation || 0);
+  const total = Number(
+    rawBreakdown.total !== undefined
+      ? rawBreakdown.total
+      : (fallbackTotal || onlineWeighted + presentation || 0)
+  );
+
+  return {
+    online: onlineWeighted,
+    onlineRaw,
+    onlineWeighted,
+    presentation,
+    total: Number(total.toFixed(2)),
+  };
+};
+
 const PART_INFO_MAP = {
   part1: { name: "PHẦN THI 1: TIÊN PHONG", roundKey: 'round_1' },
   part2: { name: "PHẦN THI 2: KHÁT VỌNG", roundKey: 'round_2' },
@@ -102,16 +124,12 @@ const PartScoreboard = () => {
         if (partKey === 'part2') {
           const breakdownData = roundScoresData.custom_breakdown || {};
           displayTeams.forEach((team) => {
-            const teamBreakdown = breakdownData[team.id] || {};
-            const online = Number(teamBreakdown.online || 0);
-            const presentation = Number(teamBreakdown.presentation || 0);
-            const total = Number(
-              teamBreakdown.total !== undefined
-                ? teamBreakdown.total
-                : (roundScoresData.custom_scores?.[team.id] || online + presentation || 0)
+            const normalizedBreakdown = normalizePart2Breakdown(
+              breakdownData[team.id] || {},
+              roundScoresData.custom_scores?.[team.id] || 0
             );
-            nextPart2BreakdownScores[team.id] = { online, presentation, total };
-            calculatedScores[team.id] = total;
+            nextPart2BreakdownScores[team.id] = normalizedBreakdown;
+            calculatedScores[team.id] = normalizedBreakdown.total;
           });
         }
         
