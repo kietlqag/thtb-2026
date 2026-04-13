@@ -1,78 +1,74 @@
-# Người là niềm tin tất thắng - Contest Application
+﻿# THTB 2026 - Contest Application
 
-Ứng dụng web quản lý cuộc thi "Người là niềm tin tất thắng" được xây dựng bằng React và Firebase.
+Ứng dụng web quản lý và vận hành cuộc thi **"THTB 2026"**, xây dựng bằng React + Vite và Firebase.
 
-## 🚀 Tính năng
+## Tổng quan
 
-### 👥 Ba vai trò chính:
+Hệ thống phục vụ 3 nhóm người dùng:
 
-1. **Admin**
-   - Quản lý trận đấu (CRUD)
-   - Quản lý đội thi (CRUD)
-   - Nhập câu hỏi qua Excel
-   - Quản lý điểm số
+- `admin`: quản lý đội thi, trận đấu, câu hỏi, điểm số
+- `organizer` (ban tổ chức): điều phối trận thi và các phần thi theo thời gian thực
+- `team` (đội thi): tham gia phần thi và theo dõi điểm
 
-2. **Ban Tổ Chức**
-   - Quản lý trận đấu
-   - Điều khiển các phần thi
-   - Cập nhật điểm số
-   - Xem bảng điểm
+## Tính năng chính
 
-3. **Đội Thi**
-   - Chọn trận đấu
-   - Tham gia các phần thi
-   - Xem điểm số
+### 1) Admin
 
-### 🎯 Các phần thi:
+- Quản lý đội thi (`teams`)
+- Quản lý trận đấu (`matches`)
+- Quản lý bộ câu hỏi (hỗ trợ nhập từ Excel)
+- Quản lý và theo dõi điểm số
 
-1. **Tiên phong**
-   - 7 gói câu hỏi tương ứng với 7 đội thi
-   - Mỗi gói gồm 10 câu trả lời nhanh
-   - Thời gian: 10 giây/câu
-   - Đáp án hợp lệ phải kèm từ `chốt`
-   - Điểm: đúng +10, sai hoặc quá giờ = 0
+### 2) Ban tổ chức (Organizer)
 
-2. **Khát vọng**
-   - Mỗi đội trình bày sản phẩm trực tuyến đã thiết kế
-   - Thời gian trình bày: 5 phút/đội
-   - Chấm điểm trực tiếp bởi Ban Giám khảo
-   - Cơ cấu điểm:
-     - Trực tuyến: 40%
-     - Thuyết minh: 60%
-   - Tổng điểm quy đổi: 100 điểm
+- Theo dõi danh sách trận đấu
+- Điều khiển màn hình cuộc thi theo từng phần
+- Mở bảng điểm toàn màn hình / bảng điểm theo từng phần
+- Cập nhật diễn biến và điểm theo thời gian thực
 
-3. **Tự hào tiến bước**
-   - 4 đội có tổng điểm phần 1 + phần 2 cao nhất vào thi đấu
-   - Có 4 mật ảnh, mỗi mật ảnh gồm 9 mảnh ghép câu hỏi
-   - Mỗi mảnh ghép tối đa 2 đội được quyền trả lời
-   - Điểm:
-     - Trả lời đúng lượt 1: +10
-     - Trả lời đúng lượt 2: +5
-     - Cả 2 lượt sai: khóa mảnh ghép
-   - Trả lời đúng mật ảnh:
-     - `(Số mảnh ghép chưa mở × 10) + 50`
+### 3) Đội thi (Team)
 
-## 🛠️ Công nghệ sử dụng
+- Vào trận thi được phân công
+- Chọn phần thi theo luồng cuộc thi
+- Tham gia làm bài ở các phần khả dụng
+- Xem điểm và trạng thái thi
 
-- React (Vite)
+## Các phần thi
+
+- `Tiên phong`: gói câu hỏi trả lời nhanh theo thời gian
+- `Khát vọng`: phần trình bày/chấm điểm sản phẩm
+- `Tự hào tiến bước`: vòng thi tăng tốc/xếp hạng với cơ chế mở mảnh ghép
+
+> Luật chi tiết có thể điều chỉnh theo từng mùa thi trong dữ liệu hệ thống.
+
+## Công nghệ sử dụng
+
+- React 19
+- Vite 6
+- React Router DOM 7
 - Firebase Authentication
 - Firebase Realtime Database
-- Ant Design
-- Material-UI
+- Ant Design 5
+- Material UI 7
+- XLSX
 
-## 📦 Cài đặt
+## Cài đặt và chạy local
 
-1. Clone repository:
-```bash
-git clone [repository-url]
-```
+### Yêu cầu
 
-2. Cài đặt dependencies:
+- Node.js 18+ (khuyến nghị Node.js 20 LTS)
+- npm 9+
+
+### Các bước
+
+1. Cài dependencies:
+
 ```bash
 npm install
 ```
 
-3. Tạo file `.env` và cấu hình Firebase:
+2. Tạo file `.env` ở thư mục gốc với cấu hình Firebase:
+
 ```env
 VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -83,39 +79,62 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 ```
 
-4. Chạy ứng dụng:
+3. Chạy môi trường phát triển:
+
 ```bash
 npm run dev
 ```
 
-## 📁 Cấu trúc thư mục
+4. Truy cập ứng dụng tại URL Vite in ra terminal (mặc định thường là `http://localhost:5173`).
 
-```
+## Scripts
+
+- `npm run dev`: chạy development server
+- `npm run build`: build production
+- `npm run preview`: chạy bản build để kiểm tra local
+- `npm run lint`: kiểm tra lint với ESLint
+
+## Điều hướng và phân quyền
+
+- `/login`: đăng nhập
+- `/admin/*`: chỉ `admin`
+- `/organizer` và các route con `/organizer/contest/...`: chỉ `organizer`
+- `/team/*`: chỉ `team`
+
+Vai trò người dùng được đọc từ Realtime Database tại nhánh:
+
+- `users/{uid}/role`
+
+## Cấu trúc thư mục
+
+```text
 src/
-├── assets/                 # Tài nguyên tĩnh
-├── components/            # Components tái sử dụng
-├── contexts/             # React Context
-├── hooks/               # Custom hooks
-├── layouts/            # Layout components
-├── pages/             # Các trang chính
-├── services/         # Firebase services
-├── styles/          # Global styles
-└── utils/          # Utility functions
+├── assets/            # Tài nguyên tĩnh
+├── contexts/          # Context (AuthContext, ...)
+├── database/          # Dữ liệu mẫu/khởi tạo (nếu có)
+├── layouts/           # Layout theo vai trò
+├── pages/             # Các màn hình theo vai trò
+├── services/          # Tích hợp Firebase và services khác
+├── styles/            # CSS global/theme
+├── utils/             # Hàm tiện ích
+├── App.jsx            # Khai báo routes + bảo vệ route
+└── main.jsx           # Entry point
 ```
 
-## 🔒 Bảo mật
+## Bảo mật
 
-- Xác thực người dùng qua Firebase Auth
-- Phân quyền dựa trên vai trò
-- Bảo vệ routes theo vai trò
+- Xác thực bằng Firebase Auth
+- Duy trì phiên đăng nhập theo `browserSessionPersistence`
+- Bảo vệ route theo vai trò người dùng
 
-## 🎨 Giao diện
+## Build và triển khai
 
-- Responsive design (16:9)
-- Theme màu xanh dương
-- Hỗ trợ tùy chỉnh theme
-- Font chữ tùy chỉnh
+```bash
+npm run build
+```
 
-## 📝 License
+Output nằm tại thư mục `dist/`.
 
-MIT 
+## License
+
+MIT
