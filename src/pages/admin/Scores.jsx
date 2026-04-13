@@ -193,22 +193,15 @@ function ScoresPage() {
 
     if (partConfig.manualOnly) {
       const fetchedCustomScores = scoresDataRoot.custom_scores || {};
-      const fetchedBreakdowns = scoresDataRoot.custom_breakdown || {};
-      const nextBreakdowns = {};
       const totals = {};
 
       teamsInMatch.forEach((team) => {
-        const normalized = normalizePart2Breakdown(
-          fetchedBreakdowns[team.id] || {},
-          Number(fetchedCustomScores[team.id] || 0)
-        );
-        nextBreakdowns[team.id] = normalized;
-        totals[team.id] = normalized.total;
+        totals[team.id] = Number(fetchedCustomScores[team.id] || 0);
       });
 
       setDetailedScores([]);
       setCustomScores(fetchedCustomScores);
-      setPart2BreakdownScores(nextBreakdowns);
+      setPart2BreakdownScores({});
       setTeamPartTotals(totals);
       setLoadingDetails(false);
       return;
@@ -495,10 +488,9 @@ function ScoresPage() {
                 <Title level={5}>Điểm Phần 2 theo cơ cấu 100%:</Title>
                 <Space direction="vertical" size={12} style={{ width: '100%' }}>
                   {teamsInMatch.map((team) => {
-                    const breakdown = part2BreakdownScores[team.id] || EMPTY_PART2_BREAKDOWN;
                     return (
                       <div
-                        key={`part2_breakdown_${team.id}`}
+                        key={`part2_total_${team.id}`}
                         style={{
                           marginBottom: 4,
                           padding: '12px 14px',
@@ -509,27 +501,16 @@ function ScoresPage() {
                       >
                         <Space wrap size={[12, 10]} align="center" style={{ width: '100%' }}>
                           <Text style={{ minWidth: '150px', fontWeight: 600 }}>{team.name}:</Text>
-                          <Text>Trực tuyến (40%)</Text>
+                          <Text>Điểm (100%)</Text>
                           <InputNumber
                             min={0}
-                            value={breakdown.onlineRaw}
-                            onChange={(value) => handlePart2BreakdownUpdate(team.id, 'onlineRaw', value)}
-                            style={{ width: 90 }}
+                            max={100}
+                            value={customScores[team.id] || 0}
+                            onChange={(value) => handleCustomScoreUpdate(team.id, value)}
+                            style={{ width: 100 }}
                           />
-                          <Text type="secondary">Quy đổi 40%: {breakdown.onlineWeighted}</Text>
-                          <Text>BTC</Text>
-                          <InputNumber min={0} max={100} value={breakdown.btc} onChange={(value) => handlePart2BreakdownUpdate(team.id, 'btc', value)} style={{ width: 80 }} />
-                          <Text>BGK 1</Text>
-                          <InputNumber min={0} max={100} value={breakdown.bgk_1} onChange={(value) => handlePart2BreakdownUpdate(team.id, 'bgk_1', value)} style={{ width: 80 }} />
-                          <Text>BGK 2</Text>
-                          <InputNumber min={0} max={100} value={breakdown.bgk_2} onChange={(value) => handlePart2BreakdownUpdate(team.id, 'bgk_2', value)} style={{ width: 80 }} />
-                          <Text>BGK 3</Text>
-                          <InputNumber min={0} max={100} value={breakdown.bgk_3} onChange={(value) => handlePart2BreakdownUpdate(team.id, 'bgk_3', value)} style={{ width: 80 }} />
-                          <Text type="secondary">TB 4 cột: {breakdown.presentationRawAverage}</Text>
-                          <Text>Thuyết minh (60%)</Text>
-                          <InputNumber min={0} max={60} value={breakdown.presentation} style={{ width: 90 }} readOnly />
                           <Tag color="blue" style={{ fontSize: '14px', padding: '4px 10px', marginInlineStart: 8 }}>
-                            Tổng: {breakdown.total}/100
+                            Tổng: {customScores[team.id] || 0}/100
                           </Tag>
                         </Space>
                       </div>
@@ -567,7 +548,7 @@ function ScoresPage() {
           {PART_DEFINITIONS[selectedPartKey]?.manualOnly && (
             <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
               {selectedPartKey === 'part_2'
-                ? 'Phần 2 gồm Trực tuyến 40% và Thuyết minh 60%. Điểm thuyết minh được tính bằng trung bình của 1 cột BTC và 3 cột BGK, sau đó nhân 60%.'
+                ? 'Phần 2 hiện chấm bằng một ô điểm duy nhất theo thang 100.'
                 : 'Phần thi này chấm theo hình thức thuyết trình. Nhập điểm trực tiếp cho từng đội ở phần trên.'}
             </Text>
           )}

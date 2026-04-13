@@ -122,14 +122,10 @@ const PartScoreboard = () => {
         }
 
         if (partKey === 'part2') {
-          const breakdownData = roundScoresData.custom_breakdown || {};
           displayTeams.forEach((team) => {
-            const normalizedBreakdown = normalizePart2Breakdown(
-              breakdownData[team.id] || {},
-              roundScoresData.custom_scores?.[team.id] || 0
-            );
-            nextPart2BreakdownScores[team.id] = normalizedBreakdown;
-            calculatedScores[team.id] = normalizedBreakdown.total;
+            const total = Number(roundScoresData.custom_scores?.[team.id] || 0);
+            nextPart2BreakdownScores[team.id] = { total };
+            calculatedScores[team.id] = total;
           });
         }
         
@@ -357,14 +353,6 @@ const PartScoreboard = () => {
             </div>
             {partKey === 'part2' ? (
               <div style={part2ScoreStackStyle}>
-                <div style={part2ScoreRowStyle}>
-                  <Text style={part2ScoreLabelStyle}>Trực tuyến 40%</Text>
-                  <Text style={part2ScoreValueStyle}>{part2BreakdownScores[team.id]?.online || 0}</Text>
-                </div>
-                <div style={part2ScoreRowStyle}>
-                  <Text style={part2ScoreLabelStyle}>Thuyết minh 60%</Text>
-                  <Text style={part2ScoreValueStyle}>{part2BreakdownScores[team.id]?.presentation || 0}</Text>
-                </div>
                 <div style={part2ScoreRowStyle}>
                   <Text style={part2ScoreLabelStyle}>Tổng 100%</Text>
                   <Text style={part2ScoreValueStyle}>{part2BreakdownScores[team.id]?.total || 0}</Text>
